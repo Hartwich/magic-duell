@@ -1,4 +1,36 @@
 import type { GameManifest } from "@open-party-lab/game-core";
+import {
+  defaultMageDuelLoadoutSpellIds,
+  getMageDuelShapeIconPath,
+  mageDuelLoadoutSize,
+  mageDuelMinLoadoutSize,
+  mageDuelSpellCatalog
+} from "./protocol.js";
+
+const spellAccentByColor = {
+  red: "#ef4444",
+  blue: "#3b82f6",
+  green: "#22c55e"
+} as const;
+
+const spellSecondaryByColor = {
+  red: "#fecaca",
+  blue: "#bfdbfe",
+  green: "#bbf7d0"
+} as const;
+
+const spellSetupOptions = mageDuelSpellCatalog.map((spell) => ({
+  id: spell.id,
+  name: spell.displayName,
+  title: `${spell.manaCost} Mana | ${(spell.cooldownMs / 1000).toFixed(1)}s Cooldown`,
+  description: spell.description,
+  iconPath: getMageDuelShapeIconPath(spell.shape),
+  visual: {
+    primaryColor: spellAccentByColor[spell.color],
+    secondaryColor: spellSecondaryByColor[spell.color],
+    accentColor: spellAccentByColor[spell.color]
+  }
+}));
 
 export const magicDuellManifest = {
   id: "magic-duell",
@@ -12,6 +44,18 @@ export const magicDuellManifest = {
   supportsTeams: false,
   estimatedRoundDurationMs: 120_000,
   roundCompletionMode: "wait_for_ready",
+  playerSetup: {
+    kind: "multi-select",
+    selectionKey: "spellLoadout",
+    title: "Spells waehlen",
+    description: "Waehle die Zauber, die auf deinem Handy-Controller verfuegbar sein sollen.",
+    required: true,
+    minSelections: mageDuelMinLoadoutSize,
+    maxSelections: mageDuelLoadoutSize,
+    defaultValue: defaultMageDuelLoadoutSpellIds,
+    readyBlockedLabel: "Erst Spells waehlen",
+    options: spellSetupOptions
+  },
   phaseDurations: {
     roundIntroMs: 1_600,
     countdownMs: 2_200,

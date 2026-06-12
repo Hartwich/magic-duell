@@ -8,7 +8,7 @@ Recommended alpha 3D wizard duel for Open Party Lab with phone-drawn spells.
 
 ## Status
 
-Recommended alpha. The 1v1 duel loop is playable with a split 3D host view, mana, shields, projectiles, cooldowns, and gesture-cast spells. The public package currently uses the default spell loadout; custom lobby loadout selection can be added later as a platform setup extension.
+Recommended alpha. The 1v1 duel loop is playable with a split 3D host view, mana, shields, projectiles, cooldowns, and gesture-cast spells. Players can choose their available spell loadout in the controller lobby before readying up.
 
 ## Run Through Open Party Lab
 

@@ -197,7 +197,7 @@ function createDuelists(context: ServerGameContext): MageDuelDuelistState[] {
     name: player.name || `${mageDuelText[context.language].fallbackPlayer} ${index + 1}`,
     color: player.color || (index === 0 ? "#38bdf8" : "#fb7185"),
     slot: index as 0 | 1,
-    loadoutSpellIds: sanitizeLoadout((player as { mageDuelLoadoutSpellIds?: readonly string[] }).mageDuelLoadoutSpellIds),
+    loadoutSpellIds: sanitizeLoadout(resolvePlayerLoadout(player)),
     hp: 100,
     maxHp: 100,
     mana: 100,
@@ -215,6 +215,16 @@ function createDuelists(context: ServerGameContext): MageDuelDuelistState[] {
     activeCast: null,
     lastGesture: null
   }));
+}
+
+function resolvePlayerLoadout(player: ServerGameContext["players"][number]): readonly string[] | undefined {
+  const setupLoadout = player.setupSelections?.spellLoadout;
+
+  if (Array.isArray(setupLoadout)) {
+    return setupLoadout;
+  }
+
+  return (player as { mageDuelLoadoutSpellIds?: readonly string[] }).mageDuelLoadoutSpellIds;
 }
 
 function sanitizeLoadout(spellIds: readonly string[] | undefined): MageDuelSpellId[] {
