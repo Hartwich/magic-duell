@@ -12,6 +12,8 @@ import type {
 } from "../protocol.js";
 import { magicDuellManifest } from "../manifest.js";
 import { MageDuel3dAudioSystem } from "./MageDuel3dAudioSystem.js";
+import { renderRoundScreens } from "./roundScreens.js";
+import { tokens } from "./platformTheme.js";
 
 interface HostClientLike {
   subscribe(callback: (state: HostAppStateLike) => void): () => void;
@@ -129,11 +131,16 @@ export class MageDuel3dHostScene extends Phaser.Scene {
   create(): void {
     const client = this.registry.get("hostClient") as HostClientLike;
 
-    this.cameras.main.setBackgroundColor("#020617");
+    this.cameras.main.setBackgroundColor(tokens().color.background);
     this.createThreeSurface();
     this.createScene();
     this.audio.attachUnlockListeners();
     this.unsubscribe = client.subscribe((state) => {
+      // Intro and result screens belong to this game, not the platform.
+      if (renderRoundScreens(this, state)) {
+        return;
+      }
+
       this.latestState = (state.game?.state ?? null) as MageDuelPublicState | null;
       this.updateAudio(this.latestState);
       this.updateStatus();
@@ -160,7 +167,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
       inset: "0",
       zIndex: "1",
       overflow: "hidden",
-      background: "#020617",
+      background: tokens().color.background,
       pointerEvents: "none"
     } satisfies Partial<CSSStyleDeclaration>);
 
@@ -206,7 +213,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
       border: "1px solid rgba(148, 163, 184, 0.18)",
       background: "linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(2, 6, 23, 0.56))",
       boxShadow: "0 14px 30px rgba(2, 6, 23, 0.28)",
-      color: "#e2e8f0",
+      color: tokens().color.textSoft,
       backdropFilter: "blur(10px)",
       boxSizing: "border-box",
       width: "100%"
@@ -226,7 +233,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
 
     const detail = document.createElement("div");
     detail.style.fontSize = "11px";
-    detail.style.color = "#94a3b8";
+    detail.style.color = tokens().color.muted;
     detail.style.minHeight = "13px";
 
     const spellRow = document.createElement("div");
@@ -292,7 +299,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
       fontSize: "10px",
       fontWeight: "900",
       letterSpacing: "0",
-      color: "#f8fafc",
+      color: tokens().color.text,
       textShadow: "0 1px 2px rgba(2, 6, 23, 0.9)"
     } satisfies Partial<CSSStyleDeclaration>);
 
@@ -315,7 +322,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(arenaRadius, 80),
       new THREE.MeshStandardMaterial({
-        color: "#111827",
+        color: tokens().color.surface,
         emissive: "#06111f",
         roughness: 0.62,
         metalness: 0.05
@@ -983,7 +990,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
         ? `radial-gradient(circle at 50% 35%, ${color}55, rgba(15, 23, 42, 0.92) 64%)`
         : "rgba(15, 23, 42, 0.82)",
       boxShadow: badge.active ? `0 0 16px ${color}55` : "0 8px 18px rgba(2, 6, 23, 0.22)",
-      color: "#f8fafc",
+      color: tokens().color.text,
       overflow: "hidden",
       display: "grid",
       placeItems: "center"
@@ -1016,7 +1023,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
       lineHeight: "1",
       textAlign: "center",
       fontWeight: "900",
-      color: "#e2e8f0",
+      color: tokens().color.textSoft,
       textShadow: "0 1px 2px rgba(2, 6, 23, 0.9)"
     } satisfies Partial<CSSStyleDeclaration>);
 
