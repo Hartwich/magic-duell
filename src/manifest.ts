@@ -65,7 +65,7 @@ export const magicDuellManifest = {
   },
 
   ownsScreens: ["round_intro", "result"],
-  visual: { accent: "#8c5f86", eyebrow: "Duel" },
+  visual: { accent: "#8c5f86", icon: "wand", eyebrow: "Duel" },
   audio: { track: { profile: "mystery", bpm: 100, rootMidi: 47, masterGain: 0.14 } },
 } as const satisfies GameManifest;
 
