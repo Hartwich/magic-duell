@@ -10,9 +10,9 @@ import type { ControllerGameRenderContext } from "./platform-registry.js";
 import { magicDuellManifest } from "../manifest.js";
 import { createMageDuelGestureInput } from "./mageDuel3dBindings.js";
 
-function getSpellLabel(spellBook: MageDuelSpellDefinition[], spellId: MageDuelSpellId | null): string {
+function getSpellLabel(spellBook: MageDuelSpellDefinition[], spellId: MageDuelSpellId | null, en: boolean): string {
   if (!spellId) {
-    return "Unklar";
+    return en ? "Unclear" : "Unklar";
   }
 
   return spellBook.find((spell) => spell.id === spellId)?.displayName ?? spellId;
@@ -21,7 +21,8 @@ function getSpellLabel(spellBook: MageDuelSpellDefinition[], spellId: MageDuelSp
 function buildDuelistModel(
   duelist: MageDuelDuelistState | undefined,
   spellBook: MageDuelSpellDefinition[],
-  now: number
+  now: number,
+  en: boolean
 ): SpellCastingDuelistModel | null {
   if (!duelist) {
     return null;
@@ -47,7 +48,7 @@ function buildDuelistModel(
     activeCastLabel: activeSpell ? `${activeSpell.displayName} ${(activeCastRemainingMs / 1000).toFixed(1)}s` : undefined,
     lastGesture: duelist.lastGesture
       ? {
-          spellLabel: getSpellLabel(spellBook, duelist.lastGesture.spellId),
+          spellLabel: getSpellLabel(spellBook, duelist.lastGesture.spellId, en),
           confidence: duelist.lastGesture.confidence,
           reason: duelist.lastGesture.reason
         }
@@ -101,8 +102,8 @@ export function buildMageDuel3dControllerModel(
     nextSpellReadyMs,
     nextSpellTotalMs,
     selectedSpellId,
-    self: buildDuelistModel(self, spellBook, now),
-    opponent: buildDuelistModel(opponent, spellBook, now),
+    self: buildDuelistModel(self, spellBook, now, en),
+    opponent: buildDuelistModel(opponent, spellBook, now, en),
     spells: loadoutSpells.map((spell) => {
       const cooldownRemainingMs = self ? Math.max(0, (self.cooldownReadyAt?.[spell.id] ?? 0) - now) : 0;
       const lacksMana = self ? self.mana < spell.manaCost : true;

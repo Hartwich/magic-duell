@@ -1,3 +1,4 @@
+import { localizeSpell, localizeGestureReason } from "../text.js";
 import {
   createBaseRoundState,
   roundPhaseDurations,
@@ -42,7 +43,7 @@ const spellBook = mageDuelSpellCatalog;
 
 const mageDuelText = {
   de: {
-    intro: "Mage Duel 3D: Zeichne Zauber auf deinem Handy.",
+    intro: "Magic Duell: Zeichne Zauber auf deinem Handy.",
     start: "Das Duell beginnt. Mana regeneriert automatisch.",
     fallbackPlayer: "Magier",
     unknownGesture: (name: string, reason: string) => `${name}: ${reason}.`,
@@ -61,7 +62,7 @@ const mageDuelText = {
     draw: "Das Duell endet unentschieden."
   },
   en: {
-    intro: "Mage Duel 3D: Draw spells on your phone.",
+    intro: "Magic Duel: Draw spells on your phone.",
     start: "The duel begins. Mana regenerates automatically.",
     fallbackPlayer: "Mage",
     unknownGesture: (name: string, reason: string) => `${name}: ${reason}.`,
@@ -427,7 +428,7 @@ function launchProjectile(
   const fireWallActive = caster.fireWallEndsAt !== null && caster.fireWallEndsAt > context.now;
   const quality = caster.activeCast?.quality ?? 1;
   const damage = scaleByQuality(spell.damage, quality) + (fireWallActive ? caster.fireWallBonusDamage : 0);
-  const message = mageDuelText[context.language].projectile(caster.name, spell.displayName);
+  const message = mageDuelText[context.language].projectile(caster.name, localizeSpell(spell, context.language).displayName);
   const duelists = updateDuelist(state, caster.playerId, (duelist) => ({
     ...duelist,
     activeCast: null
@@ -834,7 +835,7 @@ export const mageDuel3dServerGame: ServerGame<
       }),
       roundEndsAt: null,
       duelists: createDuelists(context),
-      spellBook: [...spellBook],
+      spellBook: spellBook.map((spell) => localizeSpell(spell, context.language)),
       projectiles: [],
       effects: [],
       actionLog: [],
@@ -893,7 +894,7 @@ export const mageDuel3dServerGame: ServerGame<
       color: spell.color,
       spellId: spell.id,
       confidence: recognition.confidence,
-      reason: gestureMatchesSpell ? recognition.reason : "Zauber misslungen",
+      reason: localizeGestureReason(gestureMatchesSpell ? recognition.reason : "Zauber misslungen", context.language),
       at: context.now
     };
 
@@ -902,7 +903,7 @@ export const mageDuel3dServerGame: ServerGame<
     }
 
     if (caster.mana < spell.manaCost) {
-      const message = mageDuelText[context.language].noMana(caster.name, spell.displayName);
+      const message = mageDuelText[context.language].noMana(caster.name, localizeSpell(spell, context.language).displayName);
 
       return {
         ...state,
@@ -917,7 +918,7 @@ export const mageDuel3dServerGame: ServerGame<
     }
 
     if (caster.cooldownReadyAt[spell.id] > context.now) {
-      const message = mageDuelText[context.language].cooldown(caster.name, spell.displayName);
+      const message = mageDuelText[context.language].cooldown(caster.name, localizeSpell(spell, context.language).displayName);
 
       return {
         ...state,
@@ -952,7 +953,7 @@ export const mageDuel3dServerGame: ServerGame<
 
     const target = spell.damage !== undefined ? getOpponent(state, caster.playerId) : undefined;
     const activeCast = createCast(state, spell, target?.playerId ?? null, recognition.confidence, context.now);
-    const message = mageDuelText[context.language].casting(caster.name, spell.displayName);
+    const message = mageDuelText[context.language].casting(caster.name, localizeSpell(spell, context.language).displayName);
     const duelists = updateDuelist(state, caster.playerId, (duelist) => ({
       ...duelist,
       mana: Math.max(0, duelist.mana - spell.manaCost),
@@ -1004,7 +1005,9 @@ export const mageDuel3dServerGame: ServerGame<
   isRoundFinished(state) {
     return state.phase === "locked";
   },
-  buildScore,
+  buildScore(state, context) {
+    return buildScore(state).map(entry => ({ ...entry, reason: context.language === "en" ? "Magic Duel victory" : "Magic Duell Sieg" }));
+  },
   toPublicState(state) {
     return toPublicState(state);
   },

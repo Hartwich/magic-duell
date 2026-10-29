@@ -20,6 +20,7 @@ interface HostClientLike {
 }
 
 interface HostAppStateLike {
+  room?: { language?: "de" | "en" } | null;
   game?: {
     state?: unknown;
   } | null;
@@ -105,6 +106,7 @@ function disposeObject(object: THREE.Object3D): void {
 }
 
 export class MageDuel3dHostScene extends Phaser.Scene {
+  private english = false;
   private unsubscribe?: () => void;
   private root?: HTMLDivElement;
   private statusRoot?: HTMLDivElement;
@@ -136,6 +138,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
     this.createScene();
     this.audio.attachUnlockListeners();
     this.unsubscribe = client.subscribe((state) => {
+      this.english = state.room?.language === "en";
       // Intro and result screens belong to this game, not the platform.
       if (renderRoundScreens(this, state)) {
         return;
@@ -872,9 +875,9 @@ export class MageDuel3dHostScene extends Phaser.Scene {
       panel.manaValue.textContent = `${Math.floor(duelist.mana)}/${duelist.maxMana}`;
       panel.manaFill.style.width = `${clampPct((duelist.mana / Math.max(1, duelist.maxMana)) * 100)}%`;
       panel.detail.textContent = duelist.activeCast
-        ? `Casting ${state?.spellBook.find((spell) => spell.id === duelist.activeCast?.spellId)?.displayName ?? "Spell"}`
+        ? `${this.english ? "Casting" : "Wirkt"} ${state?.spellBook.find((spell) => spell.id === duelist.activeCast?.spellId)?.displayName ?? (this.english ? "Spell" : "Zauber")}`
         : duelist.shieldHp > 0
-          ? `Shield ${Math.ceil(duelist.shieldHp)}`
+          ? `${this.english ? "Shield" : "Schild"} ${Math.ceil(duelist.shieldHp)}`
           : "";
       panel.detail.style.display = panel.detail.textContent ? "block" : "none";
       this.renderSpellBadges(panel.spellRow, duelist, state?.spellBook ?? [], now);
@@ -904,7 +907,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
         key: `cast:${duelist.activeCast.id}`,
         spell,
         fallbackColor: "#facc15",
-        label: "Cast",
+        label: this.english ? "Cast" : "Zauber",
         timeMs: duelist.activeCast.resolvesAt - now,
         active: true
       });
@@ -915,7 +918,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
         key: "active:shield",
         spell: spellBook.find((entry) => entry.id === "shield"),
         fallbackColor: "#60a5fa",
-        label: "Shield",
+        label: this.english ? "Shield" : "Schild",
         timeMs: duelist.shieldEndsAt - now,
         active: true
       });
@@ -926,7 +929,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
         key: "active:regeneration",
         spell: spellBook.find((entry) => entry.id === "regeneration"),
         fallbackColor: "#4ade80",
-        label: "Regen",
+        label: this.english ? "Regen" : "Heilung",
         timeMs: duelist.regeneration.endsAt - now,
         active: true
       });
@@ -937,7 +940,7 @@ export class MageDuel3dHostScene extends Phaser.Scene {
         key: "active:fire_wall",
         spell: spellBook.find((entry) => entry.id === "fire_wall"),
         fallbackColor: "#f97316",
-        label: "Fire",
+        label: this.english ? "Fire" : "Feuer",
         timeMs: duelist.fireWallEndsAt - now,
         active: true
       });

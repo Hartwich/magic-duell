@@ -1,3 +1,4 @@
+import { catalogText } from "./catalogText.js";
 import type { GameManifest } from "@open-party-lab/game-core";
 import {
   defaultMageDuelLoadoutSpellIds,
@@ -22,7 +23,7 @@ const spellSecondaryByColor = {
 const spellSetupOptions = mageDuelSpellCatalog.map((spell) => ({
   id: spell.id,
   name: spell.displayName,
-  title: `${spell.manaCost} Mana | ${(spell.cooldownMs / 1000).toFixed(1)}s Cooldown`,
+  title: `${spell.manaCost} Mana | ${(spell.cooldownMs / 1000).toFixed(1)}s Abklingzeit`,
   description: spell.description,
   iconPath: getMageDuelShapeIconPath(spell.shape),
   visual: {
@@ -34,6 +35,7 @@ const spellSetupOptions = mageDuelSpellCatalog.map((spell) => ({
 
 export const magicDuellManifest = {
   id: "magic-duell",
+  translations: catalogText,
   displayName: "Magic Duell",
   description: "Statisches 3D-Magierduell mit gezeichneten Handy-Zaubern.",
   minPlayers: 2,
@@ -47,13 +49,13 @@ export const magicDuellManifest = {
   playerSetup: {
     kind: "multi-select",
     selectionKey: "spellLoadout",
-    title: "Spells waehlen",
+    title: "Zauber wählen",
     description: "Waehle die Zauber, die auf deinem Handy-Controller verfuegbar sein sollen.",
     required: true,
     minSelections: mageDuelMinLoadoutSize,
     maxSelections: mageDuelLoadoutSize,
     defaultValue: defaultMageDuelLoadoutSpellIds,
-    readyBlockedLabel: "Erst Spells waehlen",
+    readyBlockedLabel: "Zuerst Zauber wählen",
     options: spellSetupOptions
   },
   phaseDurations: {
